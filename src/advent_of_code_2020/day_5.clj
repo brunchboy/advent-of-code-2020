@@ -12,10 +12,8 @@
   [code]
   (let [code (-> code
                  (str/replace #"F|L" "0")
-                 (str/replace #"B|R" "1"))
-        row  (Long/parseLong (subs code 0 7) 2)
-        col  (Long/parseLong (subs code 7) 2)]
-    (+ (* 8 row) col)))
+                 (str/replace #"B|R" "1"))]
+    (Long/parseLong code 2)))
 
 (defn part-1
   "Find the largest seat code in the puzzle input."
