@@ -1,14 +1,13 @@
 (ns advent-of-code-2020.day-6
   "Solutions to the day 6 problems."
   (:require [clojure.java.io :as io]
-            [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.set :as set]))
 
 (def input
   "The groups of answers (the puzzle input)."
   (->> (io/resource "day_6.txt")
-       slurp
-       str/split-lines
+       io/reader
+       line-seq
        (partition-by empty?)
        (filter #(not= '("") %))
        (map #(map set %))))
