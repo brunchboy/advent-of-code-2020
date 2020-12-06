@@ -6,49 +6,19 @@
 
 (def input
   "The groups of answers (the puzzle input)."
-  (str/split-lines (slurp (io/resource "day_6.txt"))))
+  (->> (io/resource "day_6.txt")
+       slurp
+       str/split-lines
+       (partition-by empty?)
+       (filter #(not= '("") %))
+       (map #(map set %))))
 
 (defn part-1
   "Solve part 1."
   []
-  (loop [sum   0
-         group #{}
-         left  input]
-    (cond
-      (empty? left)
-      (+ sum (count group))
-
-      (empty? (first left))
-      (recur (+ sum (count group))
-             #{}
-             (rest left))
-
-      :else
-      (recur sum
-             (set/union group (set (first left)))
-             (rest left)))))
+  (apply + (map (comp count #(apply clojure.set/union %)) input)))
 
 (defn part-2
   "Solve part 2."
   []
-  (loop [sum   0
-         group #{}
-         left  input
-         new   true]
-    (cond
-      (empty? left)
-      (+ sum (count group))
-
-      (empty? (first left))
-      (recur (+ sum (count group))
-             #{}
-             (rest left)
-             true)
-
-      :else
-      (recur sum
-             (if new
-               (set (first left))
-               (set/intersection group (set (first left))))
-             (rest left)
-             false))))
+  (apply + (map (comp count #(apply clojure.set/intersection %)) input)))
