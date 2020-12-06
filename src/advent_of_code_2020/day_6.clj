@@ -16,9 +16,9 @@
 (defn part-1
   "Solve part 1."
   []
-  (apply + (map (comp count #(apply clojure.set/union %)) input)))
+  (apply + (map (comp count #(apply set/union %)) input)))
 
 (defn part-2
   "Solve part 2."
   []
-  (apply + (map (comp count #(apply clojure.set/intersection %)) input)))
+  (apply + (map (comp count #(apply set/intersection %)) input)))
