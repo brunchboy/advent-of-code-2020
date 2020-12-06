@@ -5,7 +5,7 @@
             [clojure.string :as str]))
 
 (def input
-  "The ...? (the puzzle input)."
+  "The groups of answers (the puzzle input)."
   (str/split-lines (slurp (io/resource "day_6.txt"))))
 
 (defn part-1
