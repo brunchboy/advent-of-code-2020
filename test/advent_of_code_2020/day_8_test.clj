@@ -21,4 +21,4 @@ acc +6"))
   (test/is (= 1420 (sut/part-1))))
 
 (test/deftest part-2
-  (test/is (= [[:success 1245]] (sut/part-2))))
+  (test/is (= 1245 (sut/part-2))))
