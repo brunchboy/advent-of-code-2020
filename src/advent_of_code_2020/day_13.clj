@@ -6,7 +6,7 @@
 (def input
   "The bus schedule (puzzle input)."
   (str/split "17,x,x,x,x,x,x,x,x,x,x,37,x,x,x,x,x,907,x,x,x,x,x,x,x,x,x,x,x,19,x,x,x,x,x,x,x,x,x,x,23,x,x,x,x,x,29,x,653,x,x,x,x,x,x,x,x,x,41,x,x,13"
-                      #","))
+             #","))
 
 (defn time-until-bus
   "Given the timestamp at which we arrived at the bus stop, and a bus
@@ -58,17 +58,17 @@
                                (- t0 (* q t)) t
                                (- r0 (* q r)) r))))))
 
- (defn chinese-remainder
+(defn chinese-remainder
   "Calculate the chinese remainder theorem for the list of primes in `n`
   and the list of remainders in `a`. Based on the Rosetta Code solution."
   [n a]
-   (let [prod     (apply * n)
-         reducer  (fn [sum [n_i a_i]]
-                    (let [p     (quot prod n_i)
-                          egcd  (extended-gcd p n_i)
-                          inv_p (second egcd)]  ; Second element returned is the inverse.
-                      (+ sum (* a_i inv_p p))))
-         sum-prod (reduce reducer 0 (map vector n a))]
+  (let [prod     (apply * n)
+        reducer  (fn [sum [n_i a_i]]
+                   (let [p     (quot prod n_i)
+                         egcd  (extended-gcd p n_i)
+                         inv_p (second egcd)]  ; Second element returned is the inverse.
+                     (+ sum (* a_i inv_p p))))
+        sum-prod (reduce reducer 0 (map vector n a))]
     (mod sum-prod prod)))
 
 (defn remainder-parameters
