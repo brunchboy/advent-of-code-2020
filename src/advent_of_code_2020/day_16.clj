@@ -93,12 +93,9 @@
   each field position on all the nearby tickets, returns a set of all
   the field indices for which every value was valid."
   [ranges fields]
-  (reduce (fn [acc [i field]]
-            (if (every? #(valid-for-ranges? ranges %) field)
-              (conj acc i)
-              acc))
-          #{}
-          (partition 2 (interleave (range) fields))))
+  (set (keep-indexed (fn [i field]
+                       (when (every? #(valid-for-ranges? ranges %) field) i))
+                     fields)))
 
 (defn find-field-candidates
   "Determine which field indices are valid for each named field. Builds
