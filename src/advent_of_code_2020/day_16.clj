@@ -16,7 +16,7 @@
   [coll]
   (->> coll
        (partition-by str/blank?)
-       (filter #(not (str/blank? (first %))))))
+       (take-nth 2)))
 
 (defn parse-rules
   "Given the section of the problem input which defines field titles and
