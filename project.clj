@@ -9,6 +9,7 @@
                  [org.clojure/math.numeric-tower "0.0.4"]
                  [clojure-lanterna "0.9.7"]
                  [jline/jline "3.0.0.M1"]
+                 [instaparse "1.4.10"]
                  [com.taoensso/timbre "5.1.0"]]
   :main advent-of-code-2020.day-1
   :repl-options {:init-ns advent-of-code-2020.core}
