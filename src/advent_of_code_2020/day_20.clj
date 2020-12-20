@@ -86,6 +86,18 @@
        (apply *)))
 
 (defn count-matches-for-edge
+  "Given a tile id, the map of tile IDs to sets of all transformed edges
+  for that tile, and the edge we are looking to match, returns the
+  number of tiles (other than the one with our `id`) that have a
+  matching edge.
+
+  Note that this problem was made a lot simpler by the fact that this
+  always returns 0 (for an outside edge) or 1; there are no cases
+  where multiple tiles match an edge, so we don't have to search a
+  partial solution space and backtrack when we reach dead ends.
+
+  I really only used this function from the REPL to figure out how to
+  proceed on solving the problem."
   [id candidate-edges edge]
   (count (filter (fn [[candidate-id edge-set]]
                    (when (not= id candidate-id)
@@ -93,6 +105,12 @@
                  candidate-edges)))
 
 (defn count-edge-matches-for-tile
+  "Returns a list of the number of tiles which match each edge of the
+  supplied tile, using the id-to-edge-sets map described above.
+  Looking at the output revealed that the puzzle would be easy to
+  arrange, because each edge always had 0 or 1 match, and corner tiles
+  could be identified and oriented by noting they have two edges with
+  no matches."
   [candidate-edges [id tile]]
   (for [edge (edges tile)]
     (count-matches-for-edge id candidate-edges edge)))
@@ -104,17 +122,22 @@
   (map #(subs % 1 (dec (count %))) (butlast (rest tile))))
 
 (defn rotate-tile
+  "Rotates the content of the tile ninety degrees clockwise."
   [tile]
   (mapv #(apply str %) (apply map (comp reverse str) tile)))
 
 (defn flip-tile
+  "Flips the content of the tile over the Y axis."
   [tile]
   (mapv clojure.string/reverse tile))
 
 (defn orient-tile
   "Generates a possible iteration of the tile, 0 means original
   orientation, 1 through 3 are un-flipped rotations, 4 is flipped, 5
-  through 7 are flipped rotations."
+  through 7 are flipped rotations. This could be made a lot more
+  efficient by doing the rotations only once, and basically stepping
+  from orientation n-1 to n, but it worked well enough for the
+  problem."
   [tile n]
   (let [rotated (nth (iterate rotate-tile tile) (mod n 4))]
     (if (< n 4)
@@ -133,6 +156,9 @@
     (first (first matches))))
 
 (defn match-orientation
+  "Determine the orientation of the supplied tile which matches the
+  indicated edge; `i` identifies which edge of teh tile needs to
+  match, 0=top, 1=bottom, 2=left, 3=right."
   [edge i tile]
   (let [matches (->> (map (partial orient-tile tile) (range 8))
                      (filter #(= (nth (edges %) i) edge)))]
@@ -141,7 +167,17 @@
     (first matches)))
 
 (defn arrange
-  [tiles candidate-edges]
+  "Find an arrangement of the tiles where all the edges fit. This can be
+  done fairly straighforwardly. First, pick any corner, and orient it
+  so its left and top edges are the ones with no matches (it turns
+  out, and perhaps this is on purpose, all of my corner pieces were
+  already in this orientation in my puzzle input).
+
+  Then, for the rest of the first row of twelve tiles, find a piece
+  that matches the right edge of the piece we just placed, orient it
+  to fit, and put it in place. For subsequent rows, instead match and
+  orient to the bottom edge of the tile we placed above it."
+    [tiles candidate-edges]
   ;; Here is where I would add code to rotate the first corner until
   ;; its top and left edges were outside edges, but it turns out my
   ;; puzzle input already had it that way.
@@ -164,16 +200,33 @@
               (recur (conj arranged [next-id (match-orientation edge 0 next-tile)])))))))))
 
 (def monster-coordinates
+  "Identifies all the points which must have a # in order to recognize a
+  sea monster at [0 0]."
   [[18 0]
    [0 1] [5 1] [6 1] [11 1] [12 1] [17 1] [18 1] [19 1]
    [1 2] [4 2] [7 2] [10 2] [13 2] [16 2]])
 
 (defn monster-at?
+  "Given a top and left coordinate, see if there are # at the right
+  distances from that point to recognize a sea monster with that
+  origin."
   [image x y]
   (every? (fn [[monster-x monster-y]] (= (get-in image [(+ y monster-y) (+ x monster-x)]) \#))
           monster-coordinates))
 
 (defn part-2
+  "The much more painful half of the problem. Read in the tiles, gather
+  their edge sets, find the proper arrangement for them, strip off the
+  edges which were used for arrangement, build a single giant tile
+  from them, and then hunt for sea monsters at each possible
+  orientation of that big tile.
+
+  Experimenting in the REPL, I determined that only one of the
+  orientations showed matches for sea monsters, as implied by the
+  problem statement. This solution just sums the values found at each
+  orientation, wihch ends up with just that value, counts the total #
+  in the big image, and subtracts the number of monsters found
+  multiplied by the number of # in each monster."
   []
   (let [tiles           (read-tiles input)
         candidate-edges (find-candidate-edges tiles)
