@@ -12,5 +12,14 @@ sqjhc fvjkl (contains soy)
 sqjhc mxmxvkd sbzzf (contains fish)"
       (str/split-lines)))
 
-(test/deftest part-1
+(test/deftest part-1-sample
   (test/is (= (sut/part-1 sample-input) 5)))
+
+(test/deftest part-1
+  (test/is (= (sut/part-1) 1945)))
+
+(test/deftest part-2-sample
+  (test/is (= (sut/part-2 sample-input) "mxmxvkd,sqjhc,fvjkl")))
+
+(test/deftest part-2
+  (test/is (= (sut/part-2) "pgnpx,srmsh,ksdgk,dskjpq,nvbrx,khqsk,zbkbgp,xzb")))
