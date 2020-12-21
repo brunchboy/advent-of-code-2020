@@ -49,4 +49,7 @@
                                  (init-potentials all-ingredients all-allergens)
                                  parsed)
          safe            (set/difference all-ingredients (apply set/union (vals potentials)))]
-     (apply + (map count (map #(set/intersection safe %) ingredient-sets))))))
+     (->> ingredient-sets
+          (map #(set/intersection safe %))
+          (map count)
+          (apply +)))))
