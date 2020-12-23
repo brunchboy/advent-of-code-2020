@@ -12,3 +12,13 @@
 
 (test/deftest part-1
   (test/is (= "32658947" (sut/part-1))))
+
+(def sample-input-2
+  "The huge input for part 2."
+  (concat sample-input (range 10 1000001)))
+
+(test/deftest part-2-sample
+  (test/is (= 149245887792 (sut/part-2 sample-input-2))))
+
+(test/deftest part-2
+  (test/is (= 683486010900 (sut/part-2))))
