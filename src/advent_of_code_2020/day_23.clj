@@ -22,6 +22,12 @@
   [links cup]
   (lazy-seq (cons cup (link-seq links (links cup)))))
 
+(defn decrement-wrapping
+  "Helper function to find the next smallest valid cup number, wrapping
+  from zero back to the max value if needed."
+  [n max]
+  (inc (mod (- n 2) max)))
+
 (defn find-destination
   "Given the label of the current cup, the largest cup label, and the
   cups which are currently unavailable because they have been picked
@@ -30,9 +36,9 @@
   available cup whose label is less than the current cup, wrapping to
   the highest label if we hit zero."
   [current max missing]
-  (loop [result (if (> current 1) (dec current) max)]
+  (loop [result (decrement-wrapping current max)]
     (if (some #(= result %) missing)
-      (recur (if (> result 1) (dec result) max))
+      (recur (decrement-wrapping result max))
       result)))
 
 (defn move
