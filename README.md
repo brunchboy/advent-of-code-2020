@@ -1,6 +1,7 @@
 # advent-of-code-2020
 
-My solutions to this year's programming puzzles, shared on GitHub at the request of some of my coworkers.
+My solutions to this year's programming puzzles, shared on GitHub at
+the request of some of my coworkers.
 
 ## Usage
 
@@ -8,6 +9,12 @@ Just open a Clojure REPL on the project, and tweak and invoke the
 appropriate functions. I expect most everything will stay in the core
 namespace, but will hopefully remember to update this if they grow
 enough to merit splitting into other namespaces.
+
+## Extra Solutions
+
+I also decided to go back and work on the problems for 2017 after a
+coworker raved about how much fun they were. They are grouped into
+their own folders and namespaces.
 
 ## License
 
