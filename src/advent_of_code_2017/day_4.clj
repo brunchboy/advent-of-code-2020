@@ -1,6 +1,7 @@
 (ns advent-of-code-2017.day-4
   (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (def input
   "The list of passphrases to be validated (the puzzle input)."
@@ -14,12 +15,11 @@
   valid passphrase according to the rule of part 1, in other words
   consists of a list of words with no repetitions."
   [line]
-  (->> (str "[" line "]")
-      edn/read-string
-      frequencies
-      vals
-      (apply max)
-      (> 2)))
+  (->> (str/split line #"\s+")
+       frequencies
+       vals
+       (apply max)
+       (> 2)))
 
 (defn part-1
   "Counts the valid pass phrases in the input according to the rules of
@@ -34,9 +34,7 @@
   which are anagrams of each other. Note that if the no-repetitions
   rule is violated, this one will trivially be violated as well."
   [line]
-  (->> (str "[" line "]")
-       edn/read-string
-       (map name)
+  (->> (str/split line #"\s+")
        (map sort)
        frequencies
        vals
