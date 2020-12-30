@@ -1,6 +1,5 @@
 (ns advent-of-code-2017.day-4
-  (:require [clojure.edn :as edn]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
 (def input
