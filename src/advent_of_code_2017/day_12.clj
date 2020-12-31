@@ -24,11 +24,11 @@
   and a new set of programs that can communicate, update the map to
   reflect the additional connectivity."
   [known new]
-  (let [existing (apply set/union (map known new))]
+  (let [merged (apply set/union new (map known new))]
     (reduce (fn [acc prog]
-              (update acc prog (fnil set/union #{}) new existing))
+              (assoc acc prog merged))
             known
-            (set/union new existing))))
+            merged)))
 
 (defn part-1
   "Solve part 1: Read the connectivity information, building the map of
