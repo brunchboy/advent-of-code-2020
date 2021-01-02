@@ -64,7 +64,7 @@
 
 (defn part-2
   "Solve part 2 of the problem. Convert the input string to a list of
-  lengths, run 64 rounds of the know hash algorithm, then condense the
+  lengths, run 64 rounds of the knot hash algorithm, then condense the
   sparse hash to a dense hash and format it as a hexadecimal value.
   The input string can be supplied as an argument to unit test using
   the sample problems, otherwise the puzzle input is used."
