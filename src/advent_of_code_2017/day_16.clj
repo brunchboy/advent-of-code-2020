@@ -53,16 +53,17 @@
   "Going to assume we get back to the starting state in a sane number of
   moves otherwise I am not sure how to solve this in a reasonable
   amount of time. So let's see..."
-  []
-  (loop [progs (dance "abcdefghijklmnop" input)
-         n     1]
-    (if (= progs "abcdefghijklmnop")
+  [rounds]
+  (loop [rounds (drop 1 rounds)
+         n      1]
+    (if (= (first rounds) "abcdefghijklmnop")
       n
-      (recur (dance progs input)
+      (recur (drop 1 rounds)
              (inc n)))))
 
 (defn part-2
-  "Hurrah! It turns out there is a cycle syze of 60, so we don't need to
-  do anything like a billion iterations."
+  "Hurrah! It turns out there is a tiny cycle syze of 60, so we don't
+  need to do anything like a billion iterations."
   []
-  (nth (iterate #(dance % input) "abcdefghijklmnop") (mod 1000000000 60)))
+  (let [rounds (iterate #(dance % input) "abcdefghijklmnop")]
+    (nth rounds (mod 1000000000 60 #_(find-cycle-size rounds)))))
