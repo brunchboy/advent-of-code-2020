@@ -42,7 +42,7 @@
         :index)))
 
 (defn accelerate
-  "Updates a particles velocity given its acceleration."
+  "Updates a particle's velocity given its acceleration."
   [particle]
   (update particle :v (partial mapv +) (:a particle)))
 
