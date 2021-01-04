@@ -157,7 +157,7 @@
 
 (defn match-orientation
   "Determine the orientation of the supplied tile which matches the
-  indicated edge; `i` identifies which edge of teh tile needs to
+  indicated edge; `i` identifies which edge of the tile needs to
   match, 0=top, 1=bottom, 2=left, 3=right."
   [edge i tile]
   (let [matches (->> (map (partial orient-tile tile) (range 8))
