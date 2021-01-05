@@ -2,7 +2,6 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]))
 
-
 (def starting-image
   "The image that the enhancement process always begins with."
   [".#."
