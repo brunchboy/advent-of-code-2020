@@ -30,7 +30,8 @@
            (dec height)))])
 
 (defn part-2
-  "Solve part 2"
+  "Solve part 2. Note that this won't terminate if we never go below the
+  ground floor, but AoC tends not to supply broken inputs like that."
   []
   (let [[_ position] (first (filter (fn [[_ _ height]] (neg? height)) (iterate step [input 0 0])))]
     position))
