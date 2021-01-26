@@ -1,6 +1,5 @@
 (ns advent-of-code-2015.day-8
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]))
+  (:require [clojure.java.io :as io]))
 
 (def input
   "The list of quoted strings (the puzzle input)."
