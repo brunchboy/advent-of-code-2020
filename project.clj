@@ -1,5 +1,5 @@
 (defproject advent-of-code-2020 "0.1.0-SNAPSHOT"
-  :description "Solutions to the 2019 Advent of Code problems"
+  :description "Solutions to the 2020 Advent of Code problems, and other years."
   :url "https://github.com/brunchboy/advent-of-code-2019"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
             :url "https://www.eclipse.org/legal/epl-2.0/"}
