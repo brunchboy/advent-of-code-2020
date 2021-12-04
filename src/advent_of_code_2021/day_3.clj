@@ -1,8 +1,7 @@
 (ns advent-of-code-2021.day-3
   "Solutions for day 3."
   (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.set :as set]))
+            [clojure.string :as str]))
 
 (defn ->matrix
   "Converts the input text to a matrix represented as vectors of vectors of numbers."

@@ -33,36 +33,28 @@
 (defn part-1
   "Solve part 1 by brute-force enumerating all possible recipes that add
   up to 100 teaspoons, calculating the scores for each, and finding
-  the best."
-  []
-  (let [all-cookies (for [sprinkles (range 101)
-                          pb        (range (- 101 sprinkles))
-                          frosting  (range (- 101 sprinkles pb))]
-                      (let [chosen {"Sprinkles"    sprinkles
-                                    "PeanutButter" pb
-                                    "Frosting"     frosting
-                                    "Sugar" (- 100 sprinkles pb frosting)}]
-                        [(score input chosen) chosen]))]
-    (reduce (fn [[score-1 chosen-1] [score-2 chosen-2]]
-              (if (> score-1 score-2)
-                [score-1 chosen-1]
-                [score-2 chosen-2]))
-            all-cookies)))
+  the best. If `pred` is supplied, it is used as a predicate to filter
+  the recipes before they are scored, to support the refinement of
+  part 2."
+  ([]
+   (part-1 identity))
+  ([pred]
+   (let [all-cookies (for [sprinkles (range 101)
+                           pb        (range (- 101 sprinkles))
+                           frosting  (range (- 101 sprinkles pb))]
+                       (let [chosen {"Sprinkles"    sprinkles
+                                     "PeanutButter" pb
+                                     "Frosting"     frosting
+                                     "Sugar" (- 100 sprinkles pb frosting)}]
+                         [(score input chosen) chosen]))]
+     (reduce (fn [[score-1 chosen-1] [score-2 chosen-2]]
+               (if (> score-1 score-2)
+                 [score-1 chosen-1]
+                 [score-2 chosen-2]))
+             (filter pred all-cookies)))))
 
 (defn part-2
   "Solve part 2 using the same approach as part 1, but filtering out
   any cookie recipes that do not add up to 500 calories."
   []
-  (let [all-cookies (for [sprinkles (range 101)
-                          pb        (range (- 101 sprinkles))
-                          frosting  (range (- 101 sprinkles pb))]
-                      (let [chosen {"Sprinkles"    sprinkles
-                                    "PeanutButter" pb
-                                    "Frosting"     frosting
-                                    "Sugar" (- 100 sprinkles pb frosting)}]
-                        [(score input chosen) chosen]))]
-    (reduce (fn [[score-1 chosen-1] [score-2 chosen-2]]
-              (if (> score-1 score-2)
-                [score-1 chosen-1]
-                [score-2 chosen-2]))
-            (filter #(= 500 (calculate-property input (second %) 4)) all-cookies))))
+  (part-1 #(= 500 (calculate-property input (second %) 4))))
