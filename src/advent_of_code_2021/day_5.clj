@@ -1,8 +1,7 @@
 (ns advent-of-code-2021.day-5
   "Solutions for day 5."
   (:require [clojure.string :as str]
-            [clojure.java.io :as io]
-            [clojure.edn :as edn]))
+            [clojure.java.io :as io]))
 
 (defn read-line-spec
   "Reads a line specification from the puzzle input, returning it as a
