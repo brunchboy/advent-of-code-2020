@@ -64,7 +64,6 @@
   [line]
   (let [[all-digits display] (str/split line #" \| ")
         result               (translate (find-mapping all-digits) display)]
-    (println display "->" result)
     result))
 
 (defn part-2
