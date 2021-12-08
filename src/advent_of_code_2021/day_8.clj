@@ -37,6 +37,7 @@
         three      (first (filter #(and (= 5 (count %)) (= seven (set/intersection % seven))) all-digits))
         two        (first (filter #(and (= 5 (count %)) (= 3 (count (set/intersection % five)))) all-digits))
         zero       (set/difference eight (set/intersection two five four))]
+    ;; Alternately zero could be (set/difference (set all-digits) one two three four five six seven eight nine)
     {one   1
      two   2
      three 3
