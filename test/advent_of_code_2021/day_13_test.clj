@@ -1,5 +1,5 @@
 (ns advent-of-code-2021.day-13-test
-  "Unit tests for day 11."
+  "Unit tests for day 13."
   (:require [clojure.test :as test]
             [clojure.string :as str]
             [advent-of-code-2021.day-13 :as sut]))
