@@ -11,6 +11,9 @@
                  [clojure-lanterna "0.9.7"]
                  [jline/jline "3.0.0.M1"]
                  [instaparse "1.4.10"]
+                 [java3d/vecmath "1.3.1"]
+                 [java3d/j3d-core "1.3.1"]
+                 [java3d/j3d-core-utils "1.3.1"]
                  [com.taoensso/timbre "5.1.0"]]
   :main advent-of-code-2020.day-1
   :repl-options {:init-ns advent-of-code-2020.core}
