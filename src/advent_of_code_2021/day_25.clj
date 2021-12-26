@@ -60,12 +60,10 @@
 (defn steps-to-convergence
   "Count how many steps it takes for the sea cucumbers to stop moving."
   [lines]
-  (loop [i     0
-         last  nil
-         steps (iterate step lines)]
-    (let [current (first steps)]
-      (if (= current last)
-        i
-        (recur (inc i)
-               current
-               (rest steps))))))
+  (reduce (fn [{:keys [count prev]} cucumbers]
+            (if (= prev cucumbers)
+              (reduced count)
+              {:count (inc count)
+               :prev cucumbers}))
+          {:count 0}
+          (iterate step lines)))
