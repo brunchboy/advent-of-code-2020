@@ -78,7 +78,7 @@
 (defn apply-bit-criteria
   "Filter a matrix of binary numbers by considering successive columns
   of bits, keeping entries where that column has either the most or
-  least common value for the column (as determined by `rule`, until
+  least common value for the column (as determined by `rule`), until
   only one number remains. Return that."
   [matrix rule]
   (loop [index  0
