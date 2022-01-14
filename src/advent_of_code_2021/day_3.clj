@@ -73,7 +73,7 @@
   "Given a matrix of binary digits, find the least common digit in the
   column specified by index, with ties broken in favor of 0s."
   [matrix index]
-  (if (zero? (find-most-common-bit-2 matrix index)) 1 0))
+  (- 1 (find-most-common-bit-2 matrix index)))
 
 (defn apply-bit-criteria
   "Filter a matrix of binary numbers by considering successive columns
