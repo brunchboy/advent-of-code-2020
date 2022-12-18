@@ -4,94 +4,8 @@
             [clojure.set :as set]
             [clojure.string :as str]))
 
-;;; "A poor man's interval tree, from http://clj-me.cgrand.net/2012/03/16/a-poor-mans-interval-tree/
-;;; provided the basis for this slightly enhanced version I use in Beat Link Trigger. It will allow
-;;; me to keep track of ranges more efficiently than sets of individual potential beacon locations.
-
-(defn interval-lt
-  "A partial order on intervals and points, where an interval is defined
-  by the vector [from to) (notation I recall meaning it includes the
-  lower bound but excludes the upper bound), and either can be `nil`
-  to indicate negative or positive infinity. A single point at `n` is
-  represented by `[n n]`."
-  [[a b] [c _]]
-  (boolean (and b c
-                (if (= a b)
-                  (neg? (compare b c))
-                  (<= (compare b c) 0)))))
-
-(def empty-interval-map
-  "An interval map with no content."
-  (sorted-map-by interval-lt [nil nil] #{}))
-
-(defn- isplit-at
-  "Splits the interval map at the specified value, unless it already has
-  a boundary there."
-  [interval-map x]
-  (if x
-    (let [[[a b :as k] vs] (find interval-map [x x])]
-      (if (or (= a x) (= b x))
-        interval-map
-        (-> interval-map (dissoc k) (assoc [a x] vs [x b] vs))))
-    interval-map))
-
-(defn matching-subsequence
-  "Extracts the sequence of key, value pairs from the interval map which
-  cover the supplied range (either end of which can be `nil`, meaning
-  from the beginning or to the end)."
-  [interval-map from to]
-  (cond
-    (and from to)
-    (subseq interval-map >= [from from] < [to to])
-    from
-    (subseq interval-map >= [from from])
-    to
-    (subseq interval-map < [to to])
-    :else
-    interval-map))
-
-(defn- ialter
-  "Applies the specified function and arguments to all intervals that
-  fall within the specified range in the interval map, splitting it at
-  each end if necessary so that the exact desired range can be
-  affected."
-  [interval-map from to f & args]
-  (let [interval-map (-> interval-map (isplit-at from) (isplit-at to))
-        kvs          (for [[r vs] (matching-subsequence interval-map from to)]
-                       [r (apply f vs args)])]
-    (into interval-map kvs)))
-
-(defn iassoc
-  "Add a value to the specified range in an interval map."
-  [interval-map from to v]
-  (ialter interval-map from to conj v))
-
-(defn idissoc
-  "Remove a value from the specified range in an interval map. If you
-  are going to be using this function much, it might be worth adding
-  code to consolidate ranges that are no longer distinct."
-  [interval-map from to v]
-  (ialter interval-map from to disj v))
-
-(defn iget
-  "Find the values that are associated with a point or interval within
-  the interval map. Calling with a single number will look up the
-  values associated with just that point; calling with two arguments,
-  or with an interval vector, will return the values associated with
-  any interval that overlaps the supplied interval."
-  ([interval-map x]
-   (if (vector? x)
-     (let [[from to] x]
-       (iget interval-map from to))
-     (iget interval-map [x x])))
-  ([interval-map from to]
-   (reduce (fn [result [_ vs]]
-             (clojure.set/union result vs))
-           #{}
-           (take-while (fn [[[start]]] (< (or start (dec to)) to)) (matching-subsequence interval-map from nil)))))
-
-;;; End of interval tree code.
-
+;; For historical attempts to solve part 2 using interval trees, which sped up part 1 a lot,
+;; but not enough to make part 2 practical using them, see the git history.
 
 (def input
   "The instructions (the puzzle input)."
@@ -112,9 +26,6 @@
   [[x1 y1] [x2 y2]]
   (+ (Math/abs (- x1 x2)) (Math/abs (- y1 y2))))
 
-;; This approach worked, slowly, for the sample data, but was clearly not going to cut it
-;; for the real problem.
-
 (defn cells-too-close-set
   [[sensor-cell beacon-cell] y]
   (let [sensor-x     (first sensor-cell)
@@ -126,8 +37,8 @@
 
 (defn occupied-cells-set
   [sensors]
-  (reduce (fn [acc [sensor-cell beacon-cell]]
-            (set/union acc #{sensor-cell beacon-cell}))
+  (reduce (fn [acc [_sensor-cell beacon-cell]]
+            (set/union acc #{beacon-cell}))
           #{}
           sensors))
 
@@ -140,88 +51,14 @@
                            sensors)]
     (count (set/difference candidates occupied))))
 
-;; This approach solved the sample data instantly, and so it looked
-;; like it would be fast enough for the real data, but no...
-
-(defn count-interval-cells
-  "Counts how many filled cells are represented by an interval map."
-  [intervals]
-  (reduce (fn [acc [[start end] value]]
-            (if (get value true)
-              (+ acc (- end start))
-              acc))
-          0
-          intervals))
-
-(defn count-beacons-on-row
-  "Counts how many beacons are present on a row."
-  [sensors row]
-  (->> sensors
-       (map second)
-       (filter (fn [[_x y]] (= y row)))
-       set
-       count))
-
-(defn build-coverage-intervals
-  "Builds an interval tree representing all the cells that can be seen by
-  any sensor in the specified row."
-  [sensors y]
-  (reduce (fn [intervals [sensor-cell beacon-cell]]
-            (let [max-distance        (manhattan-distance sensor-cell beacon-cell)
-                  [sensor-x sensor-y] sensor-cell
-                  slack               (- max-distance (Math/abs (- y sensor-y)))]
-              (if (neg? slack)
-                intervals
-                (iassoc intervals (- sensor-x slack) (+ sensor-x slack 1) true))))
-          empty-interval-map
-          sensors))
-
 (defn part-1
   "Solve part 1."
   ([y]
    (part-1 input y))
   ([data y]
    (let [sensors (read-input data)]
-     (- (count-interval-cells (build-coverage-intervals sensors y)) (count-beacons-on-row sensors y)))))
+     (count-impossible-cells-set sensors y))))
 
-
-;; This approach turned out to be way too slow, so see below...
-#_(defn build-all-coverage-intervals
-  [sensors]
-  (reduce (fn [intervals [sensor-cell beacon-cell]]
-            (let [max-distance (manhattan-distance sensor-cell beacon-cell)
-                  [_ sensor-y] sensor-cell]
-              (reduce (fn [intervals y]
-                        (update intervals y #(or % (build-coverage-intervals sensors y))))
-                      intervals
-                      (range (- sensor-y max-distance) (+ sensor-y max-distance 1)))))
-          {}
-          sensors))
-
-#_(defn find-gap
-  "Finds an entry in the middle an interval tree whose value is not true,
-  and returns its starting coordinate."
-  [intervals]
-  (->> intervals
-       (filter (fn [[[start end] val-set]]
-                 (and start end (empty? val-set))))
-       first
-       first
-       first))
-
-#_(defn find-distress-beacon
-  "Returns the x and y coordinate where the distress beacon can be found."
-  [sensors max-y]
-  (let [all-intervals (build-all-coverage-intervals sensors)]
-    (->> (for [y (range (inc max-y))]
-           (when-let [intervals (all-intervals y)]
-             (when-let [x (find-gap intervals)]
-               [x y])))
-         (filter identity)
-         first)))
-
-;; This is the approach that actually worked.
-;; Just check the cells that are exactly beyond the range of each sensor to save a ton of time.
 
 (defn just-beyond-sensor-range
   "Return the set of cells which are just beyond the sensor range, but
