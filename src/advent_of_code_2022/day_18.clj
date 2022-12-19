@@ -18,15 +18,21 @@
        (map vec)
        set))
 
-(defn count-exposed-sides
-  "Counts the faces of the specified cube that are not adjacent to any other cube."
-  [cubes [x y z]]
-  (->> [[(dec x) y z]
+(defn adjacent-cubes
+  "Given a cube, returns the coordinates of the six cubes adjacent to
+  each of its faces."
+  [[x y z]]
+  [[(dec x) y z]
         [x (dec y) z]
         [x y (dec z)]
         [(inc x) y z]
         [x (inc y) z]
-        [x y (inc z)]]
+        [x y (inc z)]])
+
+(defn count-exposed-sides
+  "Counts the faces of the specified cube that are not adjacent to any other cube."
+  [cubes cube]
+  (->> (adjacent-cubes cube)
        (remove cubes)
        count))
 
@@ -39,54 +45,45 @@
      (->> (map (partial count-exposed-sides cubes) cubes)
           (apply +)))))
 
-(defn find-boundaries
+(defn find-outside
   "Returns the set of cubes that surround the lava cubes, using a 3-d
-  flood-fill algorithm bounded one cube away in each direction."
-  ([cubes]
-   (let [transposed          (apply map list cubes)
-         [max-x max-y max-z] (map #(apply max %) transposed)
-         [min-x min-y min-z] (map #(apply min %) transposed)
-         x                   (dec min-x)
-         y                   (dec min-y)
-         z                   (dec min-z)]
-     (find-boundaries cubes #{[x y z]} max-x max-y max-z min-x min-y min-z x y z)))
-  ([cubes boundaries max-x max-y max-z min-x min-y min-z x y z]
-   (as-> boundaries $
-     (if (and (>= x min-x)
-              (not (or (cubes [(dec x) y z]) ($ [(dec x) y z]))))
-       (find-boundaries cubes (conj $ [(dec x) y z]) max-x max-y max-z min-x min-y min-z (dec x) y z)
-       $)
-     (if (and (<= x max-x)
-              (not (or (cubes [(inc x) y z]) ($ [(inc x) y z]))))
-       (find-boundaries cubes (conj $ [(inc x) y z]) max-x max-y max-z min-x min-y min-z (inc x) y z)
-       $)
-     (if (and (>= y min-y)
-              (not (or (cubes [x (dec y) z]) (boundaries [x (dec y) z]))))
-       (find-boundaries cubes (conj $ [x (dec y) z]) max-x max-y max-z min-x min-y min-z x (dec y) z)
-       $)
-     (if (and (<= y max-y)
-              (not (or (cubes [x (inc y) z]) (boundaries [x (inc y) z]))))
-       (find-boundaries cubes (conj $ [x (inc y) z]) max-x max-y max-z min-x min-y min-z x (inc y) z)
-       $)
-     (if (and (>= z min-z)
-          (not (or (cubes [x y (dec z)]) (boundaries [x y (dec z)]))))
-       (find-boundaries cubes (conj $ [x y (dec z)]) max-x max-y max-z min-x min-y min-z x y (dec z))
-       $)
-     (if (and (<= z max-z)
-              (not (or (cubes [x y (inc z)]) (boundaries [x y (inc z)]))))
-       (find-boundaries cubes (conj $ [x y (inc z)]) max-x max-y max-z min-x min-y min-z x y (inc z))
-       $))))
+  flood-fill algorithm bounded one cube further in each direction."
+  [cubes]
+  (let [transposed          (apply map list cubes)
+        [max-x max-y max-z] (map #(inc (apply max %)) transposed)
+        [min-x min-y min-z] (map #(dec (apply min %)) transposed)]
+    (->> (iterate (fn [{:keys [outside newly-added] :as state}]
+                    (-> state
+                        (update :outside set/union (set newly-added))
+                        ;; At each step we try growing any legal direction from the cubes that were
+                        ;; most recently added. Any older cubes will already be surrounded.
+                        (assoc :newly-added (->> (mapcat adjacent-cubes newly-added)
+                                                 set
+                                                 (remove (fn [cube]
+                                                           (or (cubes cube)
+                                                               (outside cube)
+                                                               (let [[x y z] cube]
+                                                                 (not (and (<= min-x x max-x)
+                                                                           (<= min-y y max-y)
+                                                                           (<= min-z z max-z)))))))))))
+                  {:outside #{}  ; Start empty, and add flood fill seeds at all eight outside corners.
+                   :newly-added [[min-x min-y min-z]
+                                 [max-x min-y min-z]
+                                 [min-x max-y min-z]
+                                 [max-x max-y min-z]
+                                 [min-x min-y max-z]
+                                 [max-x min-y max-z]
+                                 [min-x max-y max-z]
+                                 [max-x max-y max-z]]})
+         (drop-while #(seq (:newly-added %)))  ; Keep iterating until no new cubes get added.
+         first
+         :outside)))
 
 (defn count-exposed-sides-2
-  "Counts the faces of the specified cube that are adjacent to a boundary cube."
-  [boundaries [x y z]]
-  (->> [[(dec x) y z]
-        [x (dec y) z]
-        [x y (dec z)]
-        [(inc x) y z]
-        [x (inc y) z]
-        [x y (inc z)]]
-       (filter boundaries)
+  "Counts the faces of the specified cube that are adjacent to a outside cube."
+  [outside cube]
+  (->> (adjacent-cubes cube)
+       (filter outside)
        count))
 
 (defn part-2
@@ -94,9 +91,9 @@
   ([]
    (part-2 input))
   ([data]
-   (let [cubes      (read-input data)
-         boundaries (find-boundaries cubes)]
-     (->> (map (partial count-exposed-sides-2 boundaries) cubes)
+   (let [cubes   (read-input data)
+         outside (find-outside cubes)]
+     (->> (map (partial count-exposed-sides-2 outside) cubes)
           (apply +)))))
 
 (def sample-input
