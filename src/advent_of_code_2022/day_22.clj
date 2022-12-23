@@ -86,6 +86,8 @@
           [x y]))))
 
 (defn move
+  "Move a particular distance at our current facing on the map.
+  Handle wrapping off ends, and stopping if we reach an obstacle."
   [{:keys [facing grid] :as state} distance]
   (loop [distance distance
          state    state]
