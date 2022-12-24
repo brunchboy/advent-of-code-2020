@@ -35,17 +35,19 @@
   and directions of all the blizzards, as a map from coordinates to
   the list of directions with which any blizzards are passing through
   that coordinate. In the initial input data, we know there will be at
-  most one blizzard per cell."
+  most one blizzard per cell. The blizzards are built as a lazy
+  sequence of iterating the above step function, but since they repeat
+  after the lowest common multiple of the height and width (which for
+  the sample data and my puzzle data is just the product of the height
+  and width), I can stop using the step function and just cycle the
+  sequence at that point."
   [data]
   (let [grid   (vec (str/split-lines data))
         height (- (count grid) 2)
         width  (- (count (first grid)) 2)]
     {:height height
      :width  width
-     :seen   #{}
-     :queue  [{:position  [1 0]
-               :steps     0
-               :blizzards (->> (iterate (partial step height width)
+     :blizzards (->> (iterate (partial step height width)
                                         (->> (for [x (range 1 (inc width))
                                                    y (range 1 (inc height))]
                                                (let [cell (str (get-in grid [y x]))]
@@ -54,37 +56,52 @@
                                              (filter identity)
                                              (into {})))
                                (take (* width height))
-                               cycle)}]}))
+                               cycle)}))
+
+(defn expand
+  "Given a set of positions, add any positions which can be reached from
+  them in a single step."
+  [positions height width]
+  (reduce (fn [acc [x y]]
+            (set/union acc
+                       (->> (for [[dx dy] [[-1 0] [1 0] [0 -1] [0 1]]]
+                              (let [x (+ x dx)
+                                    y (+ y dy)]
+                                (when (and (<= 1 x width)
+                                           (<= 1 y height))
+                                  [x y])))
+                            (filter identity)
+                            set)))
+          positions
+          positions))
+
+(defn solve
+  "Given a starting and ending point and the current blizzard state,
+  return the number of steps required to get to the ending point."
+  [state start end]
+   ;; We find the set of all positions we can be in after each step, by
+   ;; considering the places we can move from each previous possible position,
+   ;; and removing those which are occupied by blizzards at that step.
+   ;; As soon as one of the positions is adjacent to the exit, we have found
+   ;; the solution.
+  (let [{:keys [height width blizzards]} state]
+    (loop [steps     0
+           positions #{start}
+           blizzards blizzards]
+      #_(println steps positions end)
+      (if (positions end)
+        (inc steps)  ; We have reached the exit!
+        (recur (inc steps)
+               (set/difference (expand positions height width) (set (keys (second blizzards))))
+               (rest blizzards))))))
 
 (defn part-1
   "Solve part 1."
   ([]
    (part-1 input))
   ([data]
-   (loop [{:keys [queue seen height width] :as state} (read-input data)]
-     (let [{:keys [position steps blizzards] :as entry} (first queue)
-           [x y]                                        position]
-       (spit "/tmp/spit.txt" (str "x=" x ", y=" y ", steps="(:steps entry) ", seen=" (count seen)
-                                  ", queue=" (count queue)))
-       (if (and (= x width) (= y height))
-         (inc steps) ; We have reached the exit!
-         (recur (-> state
-                    (update :seen conj [x y (mod steps (* width height))])
-                    (assoc :queue
-                           (concat (rest queue)
-                                   (filter identity
-                                           (for [[dx dy] [[-1 0] [0 0] [1 0] [0 -1] [0 1]]]
-                                             (let [x (+ x dx)
-                                                   y (+ y dy)]
-                                               (when (and (not (seen [x y (mod steps
-                                                                               (* width height))]))
-                                                          (not ((second blizzards) [x y]))
-                                                          (or (= [1 0] [x y]) ; Still at start
-                                                              (and (<= 1 x width)  ; Within valley
-                                                                   (<= 1 y height))))
-                                                 (assoc entry :position [x y]
-                                                        :steps (inc steps)
-                                                        :blizzards (rest blizzards)))))))))))))))
+   (let [{:keys [height width] :as state} (read-input data)]
+     (solve state [1 0] [width height]))))
 
 (def sample-input
   "The test data."
@@ -100,4 +117,8 @@
   ([]
    (part-2 input))
   ([data]
-   ))
+   (let [{:keys [height width] :as state} (read-input data)
+         run-1 (solve state [1 0] [width height])
+         run-2 (solve (update state :blizzards #(drop run-1 %)) [width (inc height)] [1 1])
+         run-3 (solve (update state :blizzards #(drop (+ run-1 run-2) %)) [1 0] [width height])]
+     [run-1 run-2 run-3 (+ run-1 run-2 run-3)])))
