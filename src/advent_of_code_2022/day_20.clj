@@ -14,7 +14,7 @@
   "Much like the crab cups game from day 23 of 2020, We represent our
   message as a circular linked hash map. In my first attempt, Each key
   in the map was a number in the message, and each value is the number
-  that follows it. I was foiled because, unlike inthe crab cups game,
+  that follows it. I was foiled because, unlike in the crab cups game,
   the message values are *not* unique. So I had to change this so that
   the keys and values were tuples of [n i], where n is the number in
   the message, and i is an index ranging from 0 to the length of the
