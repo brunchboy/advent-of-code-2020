@@ -1,0 +1,5 @@
+GAMES = GAME*
+GAME = <"Game "> #"\d+" <": "> ROUND ( <"; "> ROUND )* <#"\s*">
+ROUND = BALLS ( <", "> BALLS)*
+<BALLS> = #"\d+" <" "> COLOR
+<COLOR> = 'red' | 'green' | 'blue'
