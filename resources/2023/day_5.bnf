@@ -1,0 +1,6 @@
+ALMANAC = SEEDS MAP+
+
+SEEDS = <"seeds: "> (#"\d+" <#"\s+">)+
+MAP = #"([a-z]|-)*" <#" map:\s+"> ENTRY+
+
+ENTRY= #"\d+" <" "> #"\d+" <" "> #"\d+" <#"\s*">
