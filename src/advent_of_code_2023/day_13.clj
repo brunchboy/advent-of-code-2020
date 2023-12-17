@@ -1,6 +1,7 @@
 (ns advent-of-code-2023.day-13
   "Solution for day 13."
   (:require [clojure.java.io :as io]
+            [clojure.set :as set]
             [clojure.string :as str]))
 
 (def sample-input
@@ -88,14 +89,30 @@
                                (fn [c]
                                  (if (= c \#) \. \#)))))))
 
+(defn find-mirrors
+  "Finds all rows below which the pattern perfectly reflects the rows
+  above, if any."
+  [pattern]
+  (filter (partial reflects-below? pattern) (range 1 (count pattern))))
+
+(defn score-ignoring
+  "Find a score for a pattern that is different than the one found before
+  desmudging it."
+  [old-score pattern]
+  (let [row-scores (map #(* 100 %) (find-mirrors pattern))]
+    (first (set/difference (set (concat row-scores (find-mirrors (transpose-pattern pattern))))
+                           #{old-score}))))
+
 (defn desmudged-score
+  "Find the score for a pattern that results from de-smudging one of the
+  pixels in the pattern."
   [pattern]
   (let [old-score (score pattern)]
     (->> (for [row    (range (count pattern))
                column (range (count (first pattern)))]
            (toggle pattern row column))
-         (map score)
-         (filter (fn [score] (and score (not= score old-score))))
+         (map (partial score-ignoring old-score))
+         (filter identity)
          first)))
 
 (defn part-2
@@ -106,4 +123,4 @@
    (->> data
         read-patterns
         (map desmudged-score)
-        #_(reduce +))))
+        (reduce +))))
