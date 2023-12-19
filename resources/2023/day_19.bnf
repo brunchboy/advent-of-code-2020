@@ -1,0 +1,8 @@
+<WORKFLOWS> = WORKFLOW*
+WORKFLOW = NAME <"{"> RULES <#"}\s*">
+NAME = #"[a-z]+"
+<RULES> = RULE ( <","> RULE)*
+RULE = CONDITION | ACCEPT | REJECT | NAME
+CONDITION = #"\w" ("<" | ">") #"\d+" <":"> (NAME | ACCEPT | REJECT)
+ACCEPT = <"A">
+REJECT = <"R">
